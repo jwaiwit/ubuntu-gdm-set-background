@@ -11,20 +11,24 @@ BWhi='\e[1;37m';
 RCol='\e[0m';
 
 codename=$(cat /etc/os-release | grep UBUNTU_CODENAME | cut -d = -f 2)
-osname=$(cat /etc/os-release | grep '="Ubuntu"' | cut -d = -f 2)
+osname=$(lsb_release -i | awk '{print $3}')
 
-if [ "$codename" == "focal" ]  || [ "$codename" == "hirsute" ] && [ "$osname" == '"Ubuntu"' ]; then
+if [ "$codename" == "focal" ]  || [ "$codename" == "hirsute" ] && [ "$osname" == "Ubuntu" ]; then
   source="/usr/share/gnome-shell/theme/Yaru/gnome-shell-theme.gresource"
   GDM_RESOURCE_CONFIG_NAME="gdm3"
-
-elif [ "$codename" == "impish" ] || [ "$codename" == "jammy" ] && [ "$osname" == '"Ubuntu"' ]; then
-  source="/usr/share/gnome-shell/theme/Yaru/gnome-shell-theme.gresource"
+  GDM_RESOURCE_CONFIG_THEME="Yaru"
+elif ([ "$codename" == "impish" ] || [ "$codename" == "jammy" ]) && [ "$osname" == "Ubuntu" ]; then
   GDM_RESOURCE_CONFIG_NAME="gdm"
-
+  source="/usr/share/gnome-shell/theme/Yaru/gnome-shell-theme.gresource"
+  GDM_RESOURCE_CONFIG_THEME="Yaru"
+elif ([ "$codename" == "impish" ] || [ "$codename" == "jammy" ]) && [ "$osname" == "Pop" ]; then
+  GDM_RESOURCE_CONFIG_NAME="gdm"
+  source=/usr/share/gnome-shell/theme/Pop/gnome-shell-theme.gresource  
+  GDM_RESOURCE_CONFIG_THEME="Pop"
 else
   echo -e "${Red}
 ------------------------------------------------------------------
-Sorry, Script is only for Ubuntu ${BWhi}20.04, 21.04, 21.10 & 22.04${Red} Only
+Sorry, Script is only for jammy Pop / Ubuntu ${BWhi}20.04, 21.04, 21.10 & 22.04${Red} Only
 Exiting...
 ------------------------------------------------------------------
 ${RCol}"
@@ -49,7 +53,7 @@ color='#456789'
 HELP() {
 
   echo -e "
-${BGre}ubuntu-gdm-set-background${BGre} script (for changing Ubuntu ${BWhi}20.04, 21.04, 21.10 & 22.04${RCol} GDM Background) HELP
+${BGre}ubuntu-gdm-set-background${BGre} script (for changing Ubuntu ${BWhi}20.04, 21.04, 21.10 & 22.04${RCol} / jammy Pop  GDM Background) HELP
 
 there are four options
 1. background with image
@@ -158,7 +162,7 @@ SET_GRESOURCE() {
 😕 ${BGre}Seems 'background change is successful'${RCol}
 Changes will be effective after a Reboot (${BWhi}CTRL+ALT+F1${RCol} may show the changes immediately)
 If something went wrong, log on to tty and run the below command
-${BWhi}$ sudo update-alternatives --quiet --set $GDM_RESOURCE_CONFIG_NAME-theme.gresource /usr/share/gnome-shell/theme/Yaru/gnome-shell-theme.gresource${RCol}
+${BWhi}$ sudo update-alternatives --quiet --set $GDM_RESOURCE_CONFIG_NAME-theme.gresource /usr/share/gnome-shell/theme/$GDM_RESOURCE_CONFIG_THEME/gnome-shell-theme.gresource${RCol}
 "
   else
     echo Failure
@@ -218,7 +222,7 @@ No need, Already Reset. ${Red}(or unlikely background is not set using this Scri
 background: '$color' url("resource:///org/gnome/shell/theme/gdm-background");
 background-repeat: no-repeat;
 background-size: cover;
-background-position: center; }' >$GDM_RESOURCE_CONFIG_NAME.css
+background-position: bottom; }' >$GDM_RESOURCE_CONFIG_NAME.css
     cd /tmp
     CREATE_XML
     cd theme
